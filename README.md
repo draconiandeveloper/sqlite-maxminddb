@@ -20,9 +20,6 @@ sqlite> select asn('192.168.1.1'), org('192.168.1.1'), cc('192.168.1.1');
 ||
 ```
 
-It is seemed that the static archive library file libmaxminddb.a is compiled without -fPIC option, so I didn't link statically it in maxminddb.so that is output for sqlite3.
-If you can rebuild libmaxminddb.a with -fPIC option, I recommend libmaxminddb.a link to maxminddb.so. In that case, you would not need `PRELOAD=...` when sqlite3 executeing.
-
 ## NOTE
 - This extension depends on GeoIP2-Lite, or it is other way to create a custom MaxMind DB File.
 - It will process no error in the case of success IP lookup and failure getting value. Unresolveble IP is usual.
