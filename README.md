@@ -24,6 +24,6 @@ sqlite> select asn('192.168.1.1'), org('192.168.1.1'), cc('192.168.1.1');
 - This extension depends on GeoIP2-Lite, or it is other way to create a custom MaxMind DB File.
 - It will process no error in the case of success IP lookup and failure getting value. Unresolveble IP is usual.
 - This extension loads mmdb file from fixed directory. I'd like to consider better way to load any mmdb file to library.
-- It is useful to write 'load /pathto/maxmind.so' into $HOME/.sqliterc.
+- It is useful to write '.load /pathto/maxminddb' into $HOME/.sqliterc.
 - Although maxmind/libmaxminddb is available on Windows/OS X, I don't cater for them. Now I only check on x86_64 on ubuntu 16.
 
