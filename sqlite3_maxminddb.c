@@ -2,6 +2,7 @@
 **
 ** This SQLite extension implements asn(), org(), cc() functions.
 **
+** ipmask(), ip6mask() help you translate to prefixes easily.
 */
 
 #include <sqlite3ext.h>
@@ -11,6 +12,7 @@ SQLITE_EXTENSION_INIT1
 #include <assert.h>
 #include <string.h>
 #include <linux/limits.h>
+#include <arpa/inet.h>
 
 // maxmind/libmaxminddb
 #include "maxminddb.h"
@@ -195,10 +197,79 @@ static void cc_impl(
 
 }
 
-int sqlite3_maxminddb_init(
-    sqlite3 *db,
-    char **pzErrMsg,
-    const sqlite3_api_routines *pApi)
+static void ipmask(sqlite3_context *context, int argc, sqlite3_value **argv) {
+    const char *ipstr;
+    int masklength;
+    struct in_addr in4addr;
+    char ret[16];
+
+    if (argc != 2) {
+        return;
+    }
+    if (sqlite3_value_type(argv[0]) != SQLITE3_TEXT ||
+        sqlite3_value_type(argv[1]) != SQLITE_INTEGER ) {
+        return;
+    }
+
+    ipstr = (const char*) sqlite3_value_text(argv[0]);
+    masklength = sqlite3_value_int(argv[1]);
+    if (masklength<0 || masklength>32){
+        sqlite3_result_error(context, "Wrong mask length", -1);
+        return;
+    }
+
+    if (inet_pton(AF_INET, ipstr, &in4addr) != 1) {
+        sqlite3_result_error(context, "Passed a malformed IP address", -1);
+        return;
+    }
+
+    uint32_t mask = 0;
+    for(int i=0;i<32-masklength;i++){
+        mask |= (1 << i);
+    }
+    mask = ~mask;
+    
+    in4addr.s_addr &= ntohl(mask);
+    inet_ntop(AF_INET, &in4addr.s_addr, ret, 16);
+    sqlite3_result_text(context, (char*) ret, strlen(ret), SQLITE_TRANSIENT);
+}
+
+static void ip6mask(sqlite3_context *context, int argc, sqlite3_value **argv) {
+    const char *ip6str;
+    int masklength;
+    struct in6_addr in6addr;
+    char ret[40];
+
+    assert(argc == 2);
+    if (sqlite3_value_type(argv[0]) != SQLITE3_TEXT) {
+        return;
+    }
+    if (sqlite3_value_type(argv[1]) != SQLITE_INTEGER) {
+        return;
+    }
+
+    ip6str = (const char*) sqlite3_value_text(argv[0]);
+    masklength = sqlite3_value_int(argv[1]);
+    if (masklength<0 || masklength>128){
+        sqlite3_result_error(context, "Wrong mask length", -1);
+        return;
+    }
+
+    if (inet_pton(AF_INET6, ip6str, &in6addr) == 0) {
+        sqlite3_result_error(context, "Passed a malformed IP address", -1);
+        return;
+    }
+
+    for(int i=128;i>(masklength-1);i--){
+        in6addr.s6_addr[i / 8] &= ~((char) (1 << (7-(i % 8))));
+    }
+    
+    inet_ntop(AF_INET6, in6addr.s6_addr, ret, 40);
+    sqlite3_result_text(context, (char*) ret, strlen(ret), SQLITE_TRANSIENT);
+}
+
+int sqlite3_maxminddb_init( sqlite3 *db,
+    char **pzErrMsg, const sqlite3_api_routines *pApi)
 {
     int rc = SQLITE_OK;
 
@@ -242,6 +313,22 @@ int sqlite3_maxminddb_init(
         cc_impl,
         0,
         0);
+
+    if (rc != SQLITE_OK) {
+        return rc;
+    }
+
+    rc = sqlite3_create_function(
+        db, "ipmask", 2, SQLITE_UTF8, 0,
+        ipmask, 0, 0);
+
+    if (rc != SQLITE_OK) {
+        return rc;
+    }
+
+    rc = sqlite3_create_function(
+        db, "ip6mask", 2, SQLITE_UTF8, 0,
+        ip6mask, 0, 0);
 
     if (rc != SQLITE_OK) {
         return rc;

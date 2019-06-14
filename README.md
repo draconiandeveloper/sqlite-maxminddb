@@ -1,6 +1,7 @@
 # sqlite-maxminddb
 
 This SqLite extension provides `asn()` `org()` `cc()` functions for lookup ASN, CountryCode from IP adresses.
+`ipmask(), ip6mask()' help to translate to prefixes easily.
 
 ## Usage
 
@@ -18,6 +19,8 @@ sqlite> select asn('8.8.8.8'), org('8.8.8.8'), cc('8.8.8.8');
 15169|Google LLC|US
 sqlite> select asn('192.168.1.1'), org('192.168.1.1'), cc('192.168.1.1');
 ||
+sqlite> select ipmask('192.168.1.1', 24);
+192.168.1.0
 ```
 
 ## NOTE
