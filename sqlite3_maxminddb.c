@@ -11,14 +11,25 @@ SQLITE_EXTENSION_INIT1
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#ifdef _WIN32
+#define HOMEENVNAME "HOMEPATH"
+#define PATH_MAX 256
+#include "Ws2tcpip.h"
+#else
+#define HOMEENVNAME "HOME"
 #include <linux/limits.h>
 #include <arpa/inet.h>
+#endif
 
 // maxmind/libmaxminddb
 #include "maxminddb.h"
 
 #define MSG_NOTINITIALIZED "sqlite-maxminddb is not initialized"
+#ifdef _WIN32
+#define MSG_ERRGETADDRINFO "Error from getaddrinfo for %s - %ws"
+#else
 #define MSG_ERRGETADDRINFO "Error from getaddrinfo for %s - %s"
+#endif
 #define MSG_ERRLIBMAXMIND  "Got an error from libmaxminddb: %s"
 
 #define KW_ASN     "autonomous_system_number"
@@ -268,6 +279,9 @@ static void ip6mask(sqlite3_context *context, int argc, sqlite3_value **argv) {
     sqlite3_result_text(context, (char*) ret, strlen(ret), SQLITE_TRANSIENT);
 }
 
+#ifdef _WIN32
+__declspec( dllexport )
+#endif
 int sqlite3_maxminddb_init( sqlite3 *db,
     char **pzErrMsg, const sqlite3_api_routines *pApi)
 {
@@ -334,7 +348,7 @@ int sqlite3_maxminddb_init( sqlite3 *db,
         return rc;
     }
 
-    char* HOME = getenv("HOME");
+    char* HOME = getenv(HOMEENVNAME);
     char GEOLITE2_ASN[PATH_MAX];
     char GEOLITE2_CNT[PATH_MAX];
     sprintf(GEOLITE2_ASN, "%s/.maxminddb/GeoLite2-ASN.mmdb", HOME);

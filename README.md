@@ -11,6 +11,8 @@ install from package system, or build from source.
 - downloads geolite2 (its one of available contents)
 put $HOME/.maxminddb/
 
+(on Windows) to %HOMEPATH%\.maxminddb\
+
 ```
 $ make
 $ LD_PRELOAD=libmaxminddb.so sqlite3
@@ -30,3 +32,10 @@ sqlite> select ipmask('192.168.1.1', 24);
 - It is useful to write '.load /pathto/maxminddb' into $HOME/.sqliterc.
 - Although maxmind/libmaxminddb is available on Windows/OS X, I don't cater for them. Now I only check on x86_64 on ubuntu 16.
 
+- Update for Windows tentatively. Error message doesn't print correctly.
+
+ copy sqlite3.h, sqlite3ext.h from SQLITE3 site on same directory.
+
+ clone libmaxminddb on same directory.
+
+ run build.bat, then maxminddb.dll will be generated.
