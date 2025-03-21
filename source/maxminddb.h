@@ -1,9 +1,7 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef MAXMINDDB_H
 #define MAXMINDDB_H
+
+//! @cond Doxygen_Suppress
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -233,8 +231,5 @@ MMDB_dump_entry_data_list(FILE *const stream,
                           int indent);
 extern const char *MMDB_strerror(int error_code);
 
+//! @endcond
 #endif /* MAXMINDDB_H */
-
-#ifdef __cplusplus
-}
-#endif

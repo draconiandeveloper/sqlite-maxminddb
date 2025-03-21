@@ -33,34 +33,21 @@ geoip(ipaddr)            : Retrieves all of the above separated by " | "
 2. Enter the new directory
     - `cd sqlite-maxminddb`
 
-3. Pull the source code for the MaxMind DB library
-    - `git pull --recursive https://github.com/maxmind/libmaxminddb`
-
-4. Enter the `libmaxminddb` directory and perform the following steps
+3. Build this program
     - `mkdir build && cd build`
-    - `cmake -DBUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF ..`
+    - `cmake -DCMAKE_BUILD_TYPE=Release ..`
     - `make`
 
-5. Exit the `libmaxminddb` directory
-    - `cd ../..`
+4. Copy the `GeoLite2-ASN.mmdb` and `GeoLite2-City.mmdb` files to the same directory as:
+    - **Linux:** `libmaxminddb_ext.so`
+    - **Windows:** `maxminddb_ext.dll`
+    - **macOS:** `libmaxminddb_ext.dylib`
 
-6. Build this program
-    - **Linux:** `make`
-    - **Windows:** `build.bat`
-        - You might also need to copy `sqlite3.h` and `sqlite3ext.h` to this directory to successfully compile this extension on Windows.
+5. Run SQLite3 as you normally would.
+    - Since `libmaxminddb` was statically compiled and linked, we no longer have to use the `LD_PRELOAD` method.
 
-7. Create the directory that will store the `GeoLite2-ASN.mmdb` and `GeoLite2-City.mmdb` files
-    - **Linux:** `mkdir -p ~/.maxminddb`
-    - **Windows** `mkdir %HOMEPATH%\\.maxminddb`
-
-8. Copy the `GeoLite2-ASN.mmdb` and `GeoLite2-City.mmdb` files to the newly created directories.
-
-9. Run SQLite3 as such
-    - **Linux:** `LD_PRELOAD=$PWD/libmaxminddb/build/libmaxminddb.so sqlite3`
-    - **Windows:** `LD_PRELOAD=$~dp0\\libmaxminddb\\build\\maxminddb.dll sqlite3`
-
-10. Execute the following query in SQLite3
-    - `.load ./maxminddb`
+6. Execute the following query in SQLite3
+    - `.load ./maxminddb_ext`
 
 From there you can start pulling data from the MaxMind database files.
 
@@ -73,9 +60,11 @@ From there you can start pulling data from the MaxMind database files.
 
 ## TODOs
 
-- Include a CMake build method for this extension that automates the process of pulling and compiling `libmaxminddb`, linking dependencies, and running tests.
-- Remove the hard-coded paths for the GeoIP2-Lite MMDB files, maybe I'll have them load from the same directory where the extension shared library/DLL file is located for portability.
-- Implement C++Check and Valgrind tests to catch any potential memory leaks and bad coding habits.
-- Overhaul the codebase further to make it more readable, implement Doxygen documentation, and maybe slim down the `libmaxminddb` codebase to make the code style more uniform.
-- Add more SQLite3 error responses for unresolvable IP addresses and other potential issues.
-- Run more tests to catch any issues that may be present such as IP addresses that might have more than one U.S. state associated with them *(which may crash SQLite3)*
+- [x] Include a CMake build method for this extension that automates the process of pulling and compiling `libmaxminddb`, linking dependencies, and running tests.
+- [x] Remove the hard-coded paths for the GeoIP2-Lite MMDB files, maybe I'll have them load from the same directory where the extension shared library/DLL file is located for portability.
+- [x] Implement C++Check tests to catch any potential bad coding habits.
+- [ ] Overhaul the codebase further to make it more readable,
+- [x] Implement Doxygen documentation
+- [ ] Slim down the `libmaxminddb` codebase to make the code style more uniform.
+- [ ] Add more SQLite3 error responses for unresolvable IP addresses and other potential issues.
+- [ ] Run more tests to catch any issues that may be present such as IP addresses that might have more than one U.S. state associated with them *(which may crash SQLite3)*
