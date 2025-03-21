@@ -43,6 +43,9 @@ jobs:
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DENABLE_VALGRIND_TESTS=OFF
+          -DENABLE_CPPCHECK_TESTS=OFF
+          -DUSE_DOXYGEN=OFF
           -S ${{ github.workspace }}
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
