@@ -57,6 +57,7 @@ if(NOT LIBMAXMINDDB_INCLUDE_DIR-NOTFOUND)
     target_compile_definitions(mmdb PRIVATE PACKAGE_VERSION="1.12.2")
     target_include_directories(mmdb PRIVATE ${CMAKE_SOURCE_DIR}/libmaxminddb/src)
     target_include_directories(mmdb PRIVATE ${CMAKE_SOURCE_DIR}/libmaxminddb/include)
+    target_include_directories(mmdb PRIVATE ${CMAKE_SOURCE_DIR}/libmaxminddb/generated)
     target_link_libraries(maxminddb_ext PRIVATE mmdb)
 endif()
 
