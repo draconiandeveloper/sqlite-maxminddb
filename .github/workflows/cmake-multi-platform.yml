@@ -36,7 +36,7 @@ jobs:
       - name: Set up SQLite 3
         uses: ccorsi/setup-sqlite@v1.2.1
         with:
-          sqlite-version: 3.44.4
+          sqlite-version: 3.49.1
       
       - name: Set reusable strings
         id: strings
