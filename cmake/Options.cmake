@@ -11,7 +11,14 @@ option(ENABLE_CPPCHECK_TESTS "Perform CPPCheck code analysis." ON)
 option(ENABLE_SQLITE3_TESTS "Perform multiple SQLite3 queries on known public IP addresses." ON)
 
 # Enable Doxygen to generate documentation from the code.
-option(USE_DOXYGEN "Run Doxygen to generate documentation." ON)
+option(USE_DOXYGEN "Run Doxygen to generate documentation." OFF)
+
+# Disable tests and checks for release builds
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(ENABLE_VALGRIND_TESTS OFF)
+    set(ENABLE_CPPCHECK_TESTS OFF)
+    set(ENABLE_SQLITE3_TESTS OFF)
+endif()
 
 ###
 

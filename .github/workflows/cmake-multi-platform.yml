@@ -33,19 +33,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Set up SQLite 3
+        uses: actions/setup-sqlite@v1
+        with:
+          sqlite-version: 3.44.4
+      
       - name: Set reusable strings
         id: strings
         shell: bash
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+      
       - name: Configure CMake
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DENABLE_VALGRIND_TESTS=OFF
-          -DENABLE_CPPCHECK_TESTS=OFF
-          -DUSE_DOXYGEN=OFF
           -S ${{ github.workspace }}
+      
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date + '%Y-%m-%d')"
+      
+      - name: Get current commit hash
+        id: hash
+        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
+
+      - name: Check outputs
+        run: echo "${{ steps.date }}-${{ steps.hash }}"
+
+      - name: Create tag
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.date }}-${{ steps.hash }}',
+              sha: context.sha
+            })
