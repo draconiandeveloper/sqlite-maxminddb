@@ -1,41 +1,81 @@
 # sqlite-maxminddb
 
-This SqLite extension provides `asn()` `org()` `cc()` functions for lookup ASN, CountryCode from IP adresses.
-`ipmask(), ip6mask()' help to translate to prefixes easily.
+My own modified fork of [ng-labo's code](https://github.com/ng-labo/sqlite-maxminddb)
 
-## Usage
+## Brief
 
-- prepares libmaxminddb
-install from package system, or build from source.
-
-- downloads geolite2 (its one of available contents)
-put $HOME/.maxminddb/
-
-(on Windows) to %HOMEPATH%\.maxminddb\
-
+This SQLite3 extension provides the following functions:
 ```
-$ make
-$ LD_PRELOAD=libmaxminddb.so sqlite3
-sqlite> .load ./maxminddb
-sqlite> select asn('8.8.8.8'), org('8.8.8.8'), cc('8.8.8.8');
-15169|Google LLC|US
-sqlite> select asn('192.168.1.1'), org('192.168.1.1'), cc('192.168.1.1');
-||
-sqlite> select ipmask('192.168.1.1', 24);
-192.168.1.0
+geoip_asn_number(ipaddr) : Retrieve the Autonomous System Number
+
+geoip_asn_owner(ipaddr)  : Retrieve the Autonomous System Number and the organization that owns it
+
+geoip_continent(ipaddr)  : Retrieve the continent that is associated with the address
+
+geoip_country(ipaddr)    : Retrieve the country that is associated with the address
+
+geoip_state(ipaddr)      : Retrieve the state if the country is the United States
+
+geoip_city(ipaddr)       : Retrieve the city if the country is the United States
+
+geoip_zipcode(ipaddr)    : Retrieve the Zone Improvement Plan Code if the country is the United States
+
+geoip_timezone(ipaddr)   : Retrieve the IANA time zone that is associated with the address
+
+geoip(ipaddr)            : Retrieves all of the above separated by " | "
 ```
 
-## NOTE
-- This extension depends on GeoIP2-Lite, or it is other way to create a custom MaxMind DB File.
-- It will process no error in the case of success IP lookup and failure getting value. Unresolveble IP is usual.
-- This extension loads mmdb file from fixed directory. I'd like to consider better way to load any mmdb file to library.
-- It is useful to write '.load /pathto/maxminddb' into $HOME/.sqliterc.
-- Although maxmind/libmaxminddb is available on Windows/OS X, I don't cater for them. Now I only check on x86_64 on ubuntu 16.
+## Compiling and Testing
 
-- Update for Windows tentatively. Error message doesn't print correctly.
+1. Pull the source code from this repository
+    - `git pull https://github.com/draconiandeveloper/sqlite-maxminddb`
 
- copy sqlite3.h, sqlite3ext.h from SQLITE3 site on same directory.
+2. Enter the new directory
+    - `cd sqlite-maxminddb`
 
- clone libmaxminddb on same directory.
+3. Pull the source code for the MaxMind DB library
+    - `git pull --recursive https://github.com/maxmind/libmaxminddb`
 
- run build.bat, then maxminddb.dll will be generated.
+4. Enter the `libmaxminddb` directory and perform the following steps
+    - `mkdir build && cd build`
+    - `cmake -DBUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF ..`
+    - `make`
+
+5. Exit the `libmaxminddb` directory
+    - `cd ../..`
+
+6. Build this program
+    - **Linux:** `make`
+    - **Windows:** `build.bat`
+        - You might also need to copy `sqlite3.h` and `sqlite3ext.h` to this directory to successfully compile this extension on Windows.
+
+7. Create the directory that will store the `GeoLite2-ASN.mmdb` and `GeoLite2-City.mmdb` files
+    - **Linux:** `mkdir -p ~/.maxminddb`
+    - **Windows** `mkdir %HOMEPATH%\\.maxminddb`
+
+8. Copy the `GeoLite2-ASN.mmdb` and `GeoLite2-City.mmdb` files to the newly created directories.
+
+9. Run SQLite3 as such
+    - **Linux:** `LD_PRELOAD=$PWD/libmaxminddb/build/libmaxminddb.so sqlite3`
+    - **Windows:** `LD_PRELOAD=$~dp0\\libmaxminddb\\build\\maxminddb.dll sqlite3`
+
+10. Execute the following query in SQLite3
+    - `.load ./maxminddb`
+
+From there you can start pulling data from the MaxMind database files.
+
+## Notes
+
+- This extension has only been tested on the GeoIP2-Lite *(GeoLite2)* MaxMind database files.
+    * There's no guarantee that this extension will work for other GeoIP database formats.
+- I have not personally tested this code out on a Windows or macOS machine.
+    * Plus your mileage might vary on Linux if you're using MUSL, uClibc, or any other non-Glibc C library.
+
+## TODOs
+
+- Include a CMake build method for this extension that automates the process of pulling and compiling `libmaxminddb`, linking dependencies, and running tests.
+- Remove the hard-coded paths for the GeoIP2-Lite MMDB files, maybe I'll have them load from the same directory where the extension shared library/DLL file is located for portability.
+- Implement C++Check and Valgrind tests to catch any potential memory leaks and bad coding habits.
+- Overhaul the codebase further to make it more readable, implement Doxygen documentation, and maybe slim down the `libmaxminddb` codebase to make the code style more uniform.
+- Add more SQLite3 error responses for unresolvable IP addresses and other potential issues.
+- Run more tests to catch any issues that may be present such as IP addresses that might have more than one U.S. state associated with them *(which may crash SQLite3)*
