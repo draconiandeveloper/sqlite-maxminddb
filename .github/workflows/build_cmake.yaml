@@ -3,8 +3,6 @@ name: sqlite-maxminddb-cmake
 on:
   push:
     branches: [ $default-branch ]
-    tags:
-      - v*
   pull_request:
     branches: [ $default-branch ]
   
@@ -51,16 +49,3 @@ jobs:
           -S ${{ github.workspace }}
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-release:
-  name: Released pushed tag
-  runs-on: ${{ matrix.os }}
-  steps:
-    - name: Create release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ github.ref_name }}
-      run: |
-        gh release create "$tag" \
-          --repo="$GITHUB_REPOSITORY" \
-          --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-          --generate-notes
