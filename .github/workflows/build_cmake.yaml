@@ -34,31 +34,32 @@ jobs:
             c_compiler: cl
           - os: macos-latest
             c_compiler: cl
-      steps:
-        - uses: actions/checkout@v4
-        - name: Set reusable strings
-          id: strings
-          shell: bash
-          run: |
-            echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-        - name: Configure CMake
-          run: >
-            cmake -B ${{ steps.strings.outputs.build-output-dir }}
-            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-            -S ${{ github.workspace }}
-        - name: Build
-          run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-  release:
-    name: Released pushed tag
-    runs-on: ${{ matrix.os }}
     steps:
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
+      - uses: actions/checkout@v4
+      
+      - name: Set reusable strings
+        id: strings
+        shell: bash
         run: |
-          gh release create "$tag" \
-            --repo="$GITHUB_REPOSITORY" \
-            --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
-            --generate-notes
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+      - name: Configure CMake
+        run: >
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -S ${{ github.workspace }}
+      - name: Build
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+release:
+  name: Released pushed tag
+  runs-on: ${{ matrix.os }}
+  steps:
+    - name: Create release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+      run: |
+        gh release create "$tag" \
+          --repo="$GITHUB_REPOSITORY" \
+          --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+          --generate-notes
