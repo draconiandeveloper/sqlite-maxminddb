@@ -47,7 +47,9 @@ geoip(ipaddr)            : Retrieves all of the above separated by " | "
     - Since `libmaxminddb` was statically compiled and linked, we no longer have to use the `LD_PRELOAD` method.
 
 6. Execute the following query in SQLite3
-    - `.load ./maxminddb_ext`
+    - **Linux:** `.load ./libmaxminddb_ext`
+    - **Windows:** `.load ./maxminddb_ext`
+    - **macOS:** `.load ./libmaxminddb_ext`
 
 From there you can start pulling data from the MaxMind database files.
 
