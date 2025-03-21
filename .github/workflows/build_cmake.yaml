@@ -1,13 +1,10 @@
-name: sqlite-maxminddb-cmake
+name: CMake on multiple platforms
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ $default-branch ]
-  
-permissions:
-  contents: write
+    branches: [ "master" ]
   
 jobs:
   build:
