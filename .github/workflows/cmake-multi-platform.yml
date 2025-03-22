@@ -33,10 +33,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Set up SQLite 3
-        uses: ccorsi/setup-sqlite@v1.2.1
-        with:
-          sqlite-version: 3.49.1
+      - name: Install dependencies
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            apt install libsqlite3
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install sqlite
+          else
+            brew install sqlite
+          fi
+        shell: bash
       
       - name: Set reusable strings
         id: strings
