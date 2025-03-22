@@ -51,25 +51,3 @@ jobs:
       
       - name: Build
         run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date + '%Y-%m-%d')"
-      
-      - name: Get current commit hash
-        id: hash
-        run: echo "::set-output name=hash::$(git rev-parse --short HEAD)"
-
-      - name: Check outputs
-        run: echo "${{ steps.date }}-${{ steps.hash }}"
-
-      - name: Create tag
-        uses: actions/github-script@v5
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.date }}-${{ steps.hash }}',
-              sha: context.sha
-            })

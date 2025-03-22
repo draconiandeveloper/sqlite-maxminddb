@@ -10,7 +10,10 @@ include(${CMAKE_SOURCE_DIR}/cmake/MaxMindDB.cmake)
 
 # Create our shared library.
 add_library(maxminddb_ext SHARED ${CMAKE_SOURCE_DIR}/source/sqlite3_maxminddb.c)
-target_include_directories(maxminddb_ext PRIVATE ${SQLiteCross_INCLUDE_DIR})
+
+# Find SQLite headers
+find_path(SQLite_HEADERS NAMES "sqlite3ext.h")
+target_include_directories(maxminddb_ext PRIVATE ${SQLite_HEADERS})
 
 # Link our required libraries.
 target_link_libraries(maxminddb_ext PRIVATE mmdb sqlite3)
