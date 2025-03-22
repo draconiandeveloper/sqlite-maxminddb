@@ -81,6 +81,7 @@ static const char *MMDB_get_typestr(const uint32_t type) {
     case MMDB_DATA_TYPE_FLOAT:        /**< If the data type is a floating point value */
         return "float";
     default:                          /**< Fallthrough to access an otherwise inaccessible return statement. */
+        break;
     };
 
     return "unknown";

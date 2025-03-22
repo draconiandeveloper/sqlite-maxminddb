@@ -17,12 +17,12 @@ jobs:
         c_compiler: [gcc, cl]
         include:
           - os: windows-latest
-            c_compiler: cl
+            c_compiler: gcc
           - os: ubuntu-latest
             c_compiler: gcc
         exclude:
           - os: windows-latest
-            c_compiler: gcc
+            c_compiler: cl
           - os: ubuntu-latest
             c_compiler: cl
     steps:
