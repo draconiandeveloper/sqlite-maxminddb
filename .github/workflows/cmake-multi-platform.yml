@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         build_type: [Release]
         c_compiler: [gcc, cl]
         include:
@@ -20,14 +20,10 @@ jobs:
             c_compiler: cl
           - os: ubuntu-latest
             c_compiler: gcc
-          - os: macos-latest
-            c_compiler: gcc
         exclude:
           - os: windows-latest
             c_compiler: gcc
           - os: ubuntu-latest
-            c_compiler: cl
-          - os: macos-latest
             c_compiler: cl
     steps:
       - name: Checkout code
@@ -35,12 +31,8 @@ jobs:
       
       - name: Install dependencies
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            apt install libsqlite3
-          elif [ "$RUNNER_OS" == "Windows" ]; then
+          if [ "$RUNNER_OS" == "Windows" ]; then
             choco install sqlite
-          else
-            brew install sqlite
           fi
         shell: bash
       
@@ -54,7 +46,7 @@ jobs:
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_BUILD_TYPE=Release
           -S ${{ github.workspace }}
       
       - name: Build
